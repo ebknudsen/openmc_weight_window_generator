@@ -8,6 +8,7 @@ import openmc
 import openmc.lib
 from openmc.mpi import comm
 from pathlib import Path
+from collections.abc import Iterable
 
 _ALLOWED_FILTER_TYPES = (openmc.MeshFilter, openmc.EnergyFilter, openmc.ParticleFilter)
 
@@ -122,7 +123,8 @@ class Model(openmc.Model):
         iterations: int,
         rel_err_tol: float = 0.95,
         max_split: int = 1_000_000,
-        output_dir: str = 'weight_window_outputs'
+        output_dir: str = 'weight_window_outputs',
+        mpi_args: Iterable[str] = None
     ):
         """
         Performs weight window generation using the MAGIC method
@@ -163,7 +165,7 @@ class Model(openmc.Model):
             self.export_to_xml(directory=cwd_stub/ f'{i}')
 
             # runs with xml found in dir
-            openmc.run(cwd=cwd_stub / f'{i}')
+            openmc.run(cwd=cwd_stub / f'{i}', mpi_args=mpi_args)
             sp_file = Path(cwd_stub) / f'{i}' / f'statepoint.{self.settings.batches}.h5'
 
             # if comm.rank == 0:
